@@ -1,5 +1,33 @@
-# Welcome to GitHub Desktop!
+# Kardan Choob — 3D Bedroom Furniture Store
 
-This is your README. READMEs are where you can communicate what your project is and how to use it.
+فروشگاه سه‌بعدی سرویس خواب با تجربه تعاملی Three.js / React Three Fiber.
 
-Write your name on line 6, save it, and then head back to GitHub Desktop.
+## وضعیت فعلی
+- RTL فارسی
+- صفحه اصلی فروشگاه لوکس
+- نمایش تعاملی مدل 3D با OrbitControls
+- تغییر رنگ چوب و اعمال فوری روی مدل
+- انتخاب ابعاد تخت
+- قیمت و CTA سفارش
+- کاتالوگ اولیه محصولات
+- طراحی responsive برای موبایل و دسکتاپ
+
+## منبع 3D
+این پروژه با الهام و استفاده از اکوسیستم منابع معرفی‌شده در `Fasani/three-js-resources` ساخته می‌شود؛ در مراحل بعد مدل‌های واقعی GLB/GLTF، Draco، HDRI و PBR به پروژه اضافه خواهند شد.
+
+## اجرا
+
+```bash
+npm install
+npm run dev
+```
+
+## Roadmap
+1. اتصال مدل‌های واقعی GLB/GLTF سرویس‌های خواب
+2. Configurator کامل متریال/پارچه/ابعاد
+3. صفحه محصول و گالری 3D
+4. سبد خرید و checkout
+5. API و پنل مدیریت PHP/MySQL
+6. ذخیره تنظیمات سفارشی هر سفارش
+7. بهینه‌سازی موبایل و lazy loading مدل‌ها
+8. WebXR / AR برای قرار دادن محصول در اتاق
