@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { Canvas, useThree } from '@react-three/fiber';
 import { ContactShadows, Environment, OrbitControls } from '@react-three/drei';
 import { RealBedroomModel, hasRealBedroomModel } from './Model3D';
+import CartDrawer from './CartDrawer';
 import './style.css';
 
 const finishes = [
@@ -38,48 +39,26 @@ function DemoBedroom({ woodColor, fabricColor }) {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.04, 0]} receiveShadow><planeGeometry args={[12, 12]} /><meshStandardMaterial color="#d7cbbb" roughness={0.9} /></mesh>
   </group>;
 }
-
-function BedroomModel({ woodColor, fabricColor }) {
-  if (hasRealBedroomModel()) return <RealBedroomModel woodColor={woodColor} fabricColor={fabricColor} scale={1} />;
-  return <DemoBedroom woodColor={woodColor} fabricColor={fabricColor} />;
-}
-
-function CameraPreset({ mode }) {
-  const { camera } = useThree();
-  useMemo(() => {
-    const positions = { front: [6.8, 4.7, 7.4], side: [8.7, 3.6, 1.4], top: [4.5, 8.5, 4.5] };
-    const p = positions[mode] || positions.front;
-    camera.position.set(...p);
-    camera.lookAt(0, 0.8, 0);
-  }, [camera, mode]);
-  return null;
-}
+function BedroomModel({ woodColor, fabricColor }) { return hasRealBedroomModel() ? <RealBedroomModel woodColor={woodColor} fabricColor={fabricColor} scale={1} /> : <DemoBedroom woodColor={woodColor} fabricColor={fabricColor} />; }
+function CameraPreset({ mode }) { const { camera } = useThree(); useMemo(() => { const positions = { front: [6.8, 4.7, 7.4], side: [8.7, 3.6, 1.4], top: [4.5, 8.5, 4.5] }; const p = positions[mode] || positions.front; camera.position.set(...p); camera.lookAt(0, 0.8, 0); }, [camera, mode]); return null; }
 
 function App() {
-  const [finish, setFinish] = useState(finishes[0]);
-  const [fabric, setFabric] = useState(fabrics[0]);
-  const [size, setSize] = useState(sizes[1]);
-  const [liked, setLiked] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
-  const [cameraMode, setCameraMode] = useState('front');
-  const [selectedProduct, setSelectedProduct] = useState(products[0]);
+  const [finish, setFinish] = useState(finishes[0]); const [fabric, setFabric] = useState(fabrics[0]); const [size, setSize] = useState(sizes[1]);
+  const [liked, setLiked] = useState(false); const [cartOpen, setCartOpen] = useState(false); const [cameraMode, setCameraMode] = useState('front'); const [selectedProduct, setSelectedProduct] = useState(products[0]);
   const price = selectedProduct.price + finish.extra + fabric.extra + size.extra;
-
-  const selectProduct = (product) => {
-    setSelectedProduct(product);
-    const match = finishes.find((f) => f.value === product.color);
-    if (match) setFinish(match);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const cartItem = { product: selectedProduct.name, price, wood: finish.value, woodName: finish.name, fabricName: fabric.name, size: size.label };
+  const addToCart = () => setCartOpen(true);
+  const selectProduct = (product) => { setSelectedProduct(product); const match = finishes.find((f) => f.value === product.color); if (match) setFinish(match); window.scrollTo({ top: 0, behavior: 'smooth' }); };
 
   return <main className="app">
-    <header className="header"><div className="brand"><span className="brand-mark">ک</span><div><strong>کاردان چوب</strong><small>CRAFTED FOR YOUR ROOM</small></div></div><nav><a href="#products">محصولات</a><a href="#custom">سفارشی‌سازی</a><a href="#about">درباره ما</a></nav><button className="cart">سبد خرید <span>{cartCount.toLocaleString('fa-IR')}</span></button></header>
+    <header className="header"><div className="brand"><span className="brand-mark">ک</span><div><strong>کاردان چوب</strong><small>CRAFTED FOR YOUR ROOM</small></div></div><nav><a href="#products">محصولات</a><a href="#custom">سفارشی‌سازی</a><a href="#about">درباره ما</a></nav><button className="cart" onClick={() => setCartOpen(true)}>سبد خرید <span>{cartOpen ? '۱' : '۰'}</span></button></header>
     <section className="hero"><div className="hero-copy"><p className="eyebrow">COLLECTION 2026 · 3D EXPERIENCE</p><h1>اتاق خوابتان را<br /><em>خودتان طراحی کنید.</em></h1><p className="lead">سرویس خواب را در فضای سه‌بعدی ببینید، رنگ، پارچه و ابعاد را تغییر دهید و قبل از سفارش نتیجه نهایی را تجربه کنید.</p><div className="hero-actions"><button className="primary" onClick={() => document.getElementById('custom')?.scrollIntoView({ behavior: 'smooth' })}>شروع سفارشی‌سازی <span>←</span></button><button className="ghost" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}>مشاهده مجموعه</button></div><div className="trust"><span>✓</span> تولید مستقیم در کارگاه <span>·</span> ضمانت کیفیت چوب</div></div>
       <div className="scene-card"><div className="scene-badge">{selectedProduct.name} · مدل سه‌بعدی</div><button className="heart" onClick={() => setLiked(!liked)}>{liked ? '♥' : '♡'}</button><Canvas shadows camera={{ position: [6.8, 4.7, 7.4], fov: 42 }}><CameraPreset mode={cameraMode} /><ambientLight intensity={1.1} /><directionalLight position={[5, 8, 5]} intensity={3.2} castShadow /><Environment preset="apartment" /><BedroomModel woodColor={finish.value} fabricColor={fabric.value} /><ContactShadows position={[0, -0.05, 0]} opacity={0.35} scale={12} blur={2.5} /><OrbitControls enablePan={false} minDistance={5} maxDistance={12} minPolarAngle={0.55} maxPolarAngle={1.45} /></Canvas><div className="camera-tools"><button className={cameraMode === 'front' ? 'active' : ''} onClick={() => setCameraMode('front')}>جلو</button><button className={cameraMode === 'side' ? 'active' : ''} onClick={() => setCameraMode('side')}>کنار</button><button className={cameraMode === 'top' ? 'active' : ''} onClick={() => setCameraMode('top')}>بالا</button></div><div className="scene-tip">برای چرخش، مدل را بکشید · برای زوم اسکرول کنید</div></div></section>
-    <section className="configurator" id="custom"><div><p className="eyebrow">CONFIGURATOR</p><h2>مدل خودتان را بسازید</h2><p>تغییرات شما مستقیماً روی مدل سه‌بعدی اعمال می‌شود.</p></div><div className="config-row"><div><label>رنگ چوب</label><div className="swatches">{finishes.map((f) => <button key={f.name} className={finish.name === f.name ? 'swatch active' : 'swatch'} style={{ background: f.value }} title={f.name} onClick={() => setFinish(f)} />)}</div><small>{finish.name}</small></div><div><label>پارچه</label><div className="swatches">{fabrics.map((f) => <button key={f.name} className={fabric.name === f.name ? 'swatch active' : 'swatch'} style={{ background: f.value }} title={f.name} onClick={() => setFabric(f)} />)}</div><small>{fabric.name}</small></div><div><label>ابعاد تخت</label><div className="sizes">{sizes.map((s) => <button className={size.label === s.label ? 'selected' : ''} key={s.label} onClick={() => setSize(s)}>{s.label}</button>)}</div></div><div className="price"><small>قیمت نهایی مدل</small><strong>{price.toLocaleString('fa-IR')} <b>تومان</b></strong><button onClick={() => setCartCount((c) => c + 1)}>افزودن به سبد خرید</button></div></div></section>
+    <section className="configurator" id="custom"><div><p className="eyebrow">CONFIGURATOR</p><h2>مدل خودتان را بسازید</h2><p>تغییرات شما مستقیماً روی مدل سه‌بعدی اعمال می‌شود.</p></div><div className="config-row"><div><label>رنگ چوب</label><div className="swatches">{finishes.map((f) => <button key={f.name} className={finish.name === f.name ? 'swatch active' : 'swatch'} style={{ background: f.value }} title={f.name} onClick={() => setFinish(f)} />)}</div><small>{finish.name}</small></div><div><label>پارچه</label><div className="swatches">{fabrics.map((f) => <button key={f.name} className={fabric.name === f.name ? 'swatch active' : 'swatch'} style={{ background: f.value }} title={f.name} onClick={() => setFabric(f)} />)}</div><small>{fabric.name}</small></div><div><label>ابعاد تخت</label><div className="sizes">{sizes.map((s) => <button className={size.label === s.label ? 'selected' : ''} key={s.label} onClick={() => setSize(s)}>{s.label}</button>)}</div></div><div className="price"><small>قیمت نهایی مدل</small><strong>{price.toLocaleString('fa-IR')} <b>تومان</b></strong><button onClick={addToCart}>افزودن به سبد خرید</button></div></div></section>
     <section className="products" id="products"><div className="section-heading"><div><p className="eyebrow">OUR COLLECTION</p><h2>انتخابی برای هر سلیقه</h2></div><button className="view-all">مشاهده همه ←</button></div><div className="product-grid">{products.map((product, i) => <article className={'product ' + (selectedProduct.name === product.name ? 'product-active' : '')} key={product.name} onClick={() => selectProduct(product)}><div className={'product-art art-' + i}><div className="mini-bed" style={{ background: product.color }} /></div><div className="product-meta"><div><h3>سرویس خواب {product.name}</h3><p>تولید سفارشی · چوب طبیعی</p></div><strong>{product.price.toLocaleString('fa-IR')} تومان</strong></div></article>)}</div></section>
     <section className="process"><p className="eyebrow">HOW IT WORKS</p><h2>از انتخاب تا تحویل</h2><div className="process-grid"><div><b>۰۱</b><h3>انتخاب مدل</h3><p>مدل سه‌بعدی مورد علاقه خود را انتخاب کنید.</p></div><div><b>۰۲</b><h3>شخصی‌سازی</h3><p>رنگ، پارچه و ابعاد را متناسب با اتاق خود تغییر دهید.</p></div><div><b>۰۳</b><h3>ثبت سفارش</h3><p>قیمت نهایی را ببینید و سفارش را ثبت کنید.</p></div><div><b>۰۴</b><h3>ساخت و ارسال</h3><p>در کارگاه ساخته شده و با بسته‌بندی امن ارسال می‌شود.</p></div></div></section>
     <footer id="about"><div><strong>کاردان چوب</strong><p>طراحی و ساخت سرویس خواب با تجربه‌ای متفاوت.</p></div><div>تولید سفارشی · ارسال · پشتیبانی</div><div>© 2026 Kardan Choob</div></footer>
+    <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} item={cartItem} onCheckout={() => alert('مرحله بعد: فرم اطلاعات مشتری و ثبت سفارش')} />
   </main>;
 }
 createRoot(document.getElementById('root')).render(<App />);
